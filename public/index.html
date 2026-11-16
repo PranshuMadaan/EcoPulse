@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EcoPulse AI // TIET Smart Campus Energy Optimization Platform</title>
+
+  <!-- Tailwind CSS & Google Fonts -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            obsidian: '#07090E',
+            surface: {
+              card: 'rgba(17, 24, 39, 0.72)',
+              cardHover: 'rgba(26, 36, 56, 0.85)',
+              border: 'rgba(35, 192, 180, 0.22)',
+              borderViolet: 'rgba(139, 92, 246, 0.3)'
+            },
+            cyan: {
+              brand: '#23C0B4',
+              glow: 'rgba(35, 192, 180, 0.4)'
+            },
+            violet: {
+              brand: '#8B5CF6',
+              glow: 'rgba(139, 92, 246, 0.35)'
+            },
+            alert: {
+              red: '#FF4D4D',
+              amber: '#F59E0B'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace']
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    body {
+      background-color: #07090E;
+      background-image: 
+        radial-gradient(circle at 18% 12%, rgba(139, 92, 246, 0.12) 0%, transparent 40%),
+        radial-gradient(circle at 82% 8%, rgba(35, 192, 180, 0.12) 0%, transparent 45%),
+        radial-gradient(circle at 50% 85%, rgba(15, 23, 42, 0.6) 0%, transparent 60%);
+      background-attachment: fixed;
+      color: #E2E8F0;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .glass-panel {
+      background: rgba(14, 20, 32, 0.72);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(35, 192, 180, 0.22);
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.6);
+    }
+
+    .glass-panel-subtle {
+      background: rgba(17, 24, 39, 0.55);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .glow-cyan-hover:hover {
+      border-color: rgba(35, 192, 180, 0.65);
+      box-shadow: 0 0 25px -4px rgba(35, 192, 180, 0.3);
+      transform: translateY(-2px);
+    }
+
+    .glow-violet-hover:hover {
+      border-color: rgba(139, 92, 246, 0.65);
+      box-shadow: 0 0 25px -4px rgba(139, 92, 246, 0.3);
+      transform: translateY(-2px);
+    }
+
+    .tab-btn.active {
+      background: linear-gradient(135deg, rgba(35, 192, 180, 0.22), rgba(139, 92, 246, 0.18));
+      border-color: #23C0B4;
+      color: #FFFFFF;
+      box-shadow: 0 0 15px rgba(35, 192, 180, 0.35);
+    }
+
+    .tab-btn:not(.active) {
+      border-color: rgba(255, 255, 255, 0.08);
+      color: #94A3B8;
+    }
+
+    .pulse-dot {
+      animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+
+    @keyframes pulse-ring {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(1.15); }
+    }
+
+    .alert-pulse {
+      animation: alert-glow 1.8s infinite;
+    }
+
+    @keyframes alert-glow {
+      0%, 100% { border-color: rgba(255, 77, 77, 0.4); box-shadow: 0 0 10px rgba(255, 77, 77, 0.15); }
+      50% { border-color: rgba(255, 77, 77, 0.9); box-shadow: 0 0 22px rgba(255, 77, 77, 0.45); }
+    }
+
+    input[type=range] {
+      -webkit-appearance: none;
+      background: rgba(30, 41, 59, 0.9);
+      height: 8px;
+      border-radius: 9999px;
+      border: 1px solid rgba(35, 192, 180, 0.3);
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      height: 22px;
+      width: 22px;
+      border-radius: 50%;
+      background: #23C0B4;
+      cursor: pointer;
+      box-shadow: 0 0 14px #23C0B4;
+      border: 2px solid #FFFFFF;
+      transition: transform 0.1s ease;
+    }
+    input[type=range]::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+    }
+
+    .view-container {
+      transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1), transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .view-container.hidden {
+      display: none;
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    .view-container:not(.hidden) {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col selection:bg-cyan-brand/30 selection:text-white">
+
+  <!-- ==================================================================== -->
+  <!-- 1. TOP GLOBAL ASTRA NAVIGATION                                      -->
+  <!-- ==================================================================== -->
+  <header class="sticky top-0 z-50 border-b border-cyan-brand/20 bg-obsidian/85 backdrop-blur-xl">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
+      
+      <!-- Brand Logo & Context -->
+      <div class="flex items-center gap-3.5 cursor-pointer" onclick="switchView('home')">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-brand to-violet-brand p-[1.5px] flex items-center justify-center shadow-[0_0_20px_rgba(35,192,180,0.35)]">
+          <div class="w-full h-full bg-[#090D16] rounded-[10px] flex items-center justify-center">
+            <svg class="w-5 h-5 text-cyan-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+            </svg>
+          </div>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="font-extrabold text-xl tracking-tight text-white font-sans">EcoPulse<span class="text-cyan-brand">.AI</span></span>
+            <span class="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-cyan-brand/10 border border-cyan-brand/30 text-cyan-brand font-semibold">v3.4 Edge</span>
+          </div>
+          <p class="text-xs text-slate-400 font-medium">Thapar Institute of Engineering &amp; Technology <span class="text-slate-500 font-mono">(UEN008 - Group 4, Sec 1A14)</span></p>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <nav class="hidden md:flex items-center gap-1.5 p-1 rounded-xl bg-slate-900/60 border border-slate-800" id="main-nav-tabs">
+        <button id="tab-nav-home" onclick="switchView('home')" class="tab-btn px-4 py-2 rounded-lg text-xs font-semibold tracking-wide transition-all duration-200 flex items-center gap-2 border active">
+          <span class="w-1.5 h-1.5 rounded-full bg-cyan-brand"></span>
+          00. Home Hub
+        </button>
+        <button id="tab-nav-iot" onclick="switchView('iot')" class="tab-btn px-4 py-2 rounded-lg text-xs font-semibold tracking-wide transition-all duration-200 flex items-center gap-2 border">
+          <span class="w-1.5 h-1.5 rounded-full bg-cyan-brand"></span>
+          01. IoT Telemetry
+        </button>
+        <button id="tab-nav-audit" onclick="switchView('audit')" class="tab-btn px-4 py-2 rounded-lg text-xs font-semibold tracking-wide transition-all duration-200 flex items-center gap-2 border">
+          <span class="w-1.5 h-1.5 rounded-full bg-violet-brand"></span>
+          02. AI Anomaly Audit
+        </button>
+        <button id="tab-nav-vfd" onclick="switchView('vfd')" class="tab-btn px-4 py-2 rounded-lg text-xs font-semibold tracking-wide transition-all duration-200 flex items-center gap-2 border">
+          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
+          </svg>
+          03. VFD Calculator
+        </button>
+      </nav>
+
+      <!-- Grid Status Pill & Utility Context -->
+      <div class="flex items-center gap-3">
+        <div class="flex items-center gap-2.5 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-mono text-[11px] font-semibold shadow-[0_0_12px_rgba(16,185,129,0.15)]">
+          <span class="relative flex h-2 w-2">
+            <span class="pulse-dot absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+          </span>
+          <span id="header-grid-status">50 Hz // PSPCL HT GRID ONLINE (₹7.80/kWh)</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ==================================================================== -->
+  <!-- MAIN DYNAMIC CONTENT CONTAINER                                       -->
+  <!-- ==================================================================== -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <!-- ============================================================== -->
+    <!-- VIEW 0: HOME HUB (id="view-home")                              -->
+    <!-- ============================================================== -->
+    <section id="view-home" class="view-container space-y-8">
+      
+      <!-- Hero Banner -->
+      <div class="text-center py-6 space-y-3">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-brand/10 border border-cyan-brand/30 text-cyan-brand font-mono text-xs font-semibold mb-2">
+          <span class="w-2 h-2 rounded-full bg-cyan-brand animate-pulse"></span>
+          AUTONOMOUS CAMPUS ENERGY GOVERNANCE
+        </div>
+        <h1 class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white via-cyan-brand to-violet-brand tracking-tight">
+          EcoPulse AI — Autonomous Energy Optimization
+        </h1>
+        <p class="text-sm sm:text-base text-slate-400 max-w-3xl mx-auto">
+          Thapar Institute of Engineering &amp; Technology (TIET), Patiala · Course: Energy &amp; Environment (UEN008) · Group 4, Section 1A14. Edge telemetry, Scikit-Learn Isolation Forest anomaly audit, and Centrifugal Affinity Law VFD regulation.
+        </p>
+      </div>
+
+      <!-- Key Metrics Counter Strip -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        
+        <div class="glass-panel rounded-2xl p-6 border border-cyan-brand/30 text-center glow-cyan-hover transition-all">
+          <span class="text-xs font-mono uppercase tracking-wider text-slate-400 block mb-1">Campus Live Load</span>
+          <div id="home-live-load" class="text-5xl font-extrabold text-cyan-brand font-mono tracking-tight">48.2 kW</div>
+          <span class="text-xs text-slate-500 font-mono mt-2 block">CSED Computer Lab 204 Sub-meters</span>
+        </div>
+
+        <div class="glass-panel rounded-2xl p-6 border border-alert-red/30 text-center hover:border-alert-red/60 transition-all">
+          <span class="text-xs font-mono uppercase tracking-wider text-slate-400 block mb-1">Off-Hour Leakage Prevented</span>
+          <div id="home-leakage" class="text-5xl font-extrabold text-alert-red font-mono tracking-tight">₹1,944 / day</div>
+          <span class="text-xs text-slate-500 font-mono mt-2 block">PSPCL Commercial HT Rate @ ₹7.80/kWh</span>
+        </div>
+
+        <div class="glass-panel rounded-2xl p-6 border border-emerald-500/30 text-center hover:border-emerald-500/60 transition-all">
+          <span class="text-xs font-mono uppercase tracking-wider text-slate-400 block mb-1">Annual Carbon Avoided</span>
+          <div id="home-carbon" class="text-5xl font-extrabold text-emerald-400 font-mono tracking-tight">41.8 Tonnes</div>
+          <span class="text-xs text-slate-500 font-mono mt-2 block">CEA Grid Emission Factor: 0.70 kg CO₂/kWh</span>
+        </div>
+
+      </div>
+
+      <!-- 3 Interactive Portal Cards -->
+      <div class="space-y-4 pt-4">
+        <div class="flex items-center justify-between">
+          <h3 class="text-lg font-bold text-white font-mono flex items-center gap-2">
+            <span class="text-cyan-brand">//</span> Interactive Operational Subsystems
+          </h3>
+          <span class="text-xs text-slate-400 font-mono">Select any module to inspect live controls</span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          
+          <!-- Card 1: 01. IoT Predictive Telemetry -->
+          <div onclick="switchView('iot')" class="glass-panel rounded-2xl p-6 border border-cyan-brand/30 hover:border-cyan-brand transition-all cursor-pointer glow-cyan-hover flex flex-col justify-between group">
+            <div class="space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-mono px-2 py-0.5 rounded bg-cyan-brand/20 text-cyan-brand font-bold">MODULE 01</span>
+                <span class="w-2 h-2 rounded-full bg-cyan-brand pulse-dot"></span>
+              </div>
+              <h4 class="text-xl font-bold text-white group-hover:text-cyan-brand transition-colors">IoT Telemetry &amp; ESP32 Sensors</h4>
+              <p class="text-xs text-slate-400 leading-relaxed">
+                Sub-second telemetry from ESP32 node <code class="text-cyan-brand font-mono">ESP32-THAPAR-CSED-LAB204</code> with HC-SR501 PIR sensor on GPIO 14. Detects phantom drain in vacant labs.
+              </p>
+            </div>
+            <div class="pt-5 mt-4 border-t border-slate-800 flex items-center justify-between text-xs font-mono text-cyan-brand group-hover:translate-x-1 transition-transform">
+              <span>Launch Hardware Console</span>
+              <span>→</span>
+            </div>
+          </div>
+
+          <!-- Card 2: 02. AI Energy Anomaly Audit -->
+          <div onclick="switchView('audit')" class="glass-panel rounded-2xl p-6 border border-violet-brand/30 hover:border-violet-brand transition-all cursor-pointer glow-violet-hover flex flex-col justify-between group">
+            <div class="space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-mono px-2 py-0.5 rounded bg-violet-brand/20 text-violet-300 font-bold">MODULE 02</span>
+                <span class="w-2 h-2 rounded-full bg-violet-brand pulse-dot"></span>
+              </div>
+              <h4 class="text-xl font-bold text-white group-hover:text-violet-300 transition-colors">AI Anomaly Audit &amp; Isolation Forest</h4>
+              <p class="text-xs text-slate-400 leading-relaxed">
+                Unsupervised ML profiling over 24-hour load curves across Nava Nalanda Central Library, Hostel M, and Block C. Flags off-hour baseline spikes with 94.6% confidence.
+              </p>
+            </div>
+            <div class="pt-5 mt-4 border-t border-slate-800 flex items-center justify-between text-xs font-mono text-violet-400 group-hover:translate-x-1 transition-transform">
+              <span>Inspect Anomaly Radar</span>
+              <span>→</span>
+            </div>
+          </div>
+
+          <!-- Card 3: 03. VFD Motor & Carbon Calculator -->
+          <div onclick="switchView('vfd')" class="glass-panel rounded-2xl p-6 border border-emerald-500/30 hover:border-emerald-400 transition-all cursor-pointer flex flex-col justify-between group">
+            <div class="space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold">MODULE 03</span>
+                <span class="w-2 h-2 rounded-full bg-emerald-400 pulse-dot"></span>
+              </div>
+              <h4 class="text-xl font-bold text-white group-hover:text-emerald-400 transition-colors">VFD Motor &amp; Carbon Calculator</h4>
+              <p class="text-xs text-slate-400 leading-relaxed">
+                Centrifugal Affinity Laws applied to TAN Auditorium 22 kW blower motor. Evaluates cubic power drops ($P \propto N^3$) delivering ~48.8% energy savings at 80% speed setpoint.
+              </p>
+            </div>
+            <div class="pt-5 mt-4 border-t border-slate-800 flex items-center justify-between text-xs font-mono text-emerald-400 group-hover:translate-x-1 transition-transform">
+              <span>Open Dynamic Simulator</span>
+              <span>→</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ============================================================== -->
+    <!-- VIEW 1: 01. IOT HARDWARE & TELEMETRY (id="view-iot")           -->
+    <!-- ============================================================== -->
+    <section id="view-iot" class="view-container hidden space-y-7">
+      
+      <!-- View Header Breadcrumb & Status -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-800">
+        <div>
+          <div class="flex items-center gap-2 text-xs font-mono text-cyan-brand">
+            <span>LOCATION: CSED LAB 204</span>
+            <span class="text-slate-600">//</span>
+            <span>REST ENDPOINT: /api/iot</span>
+          </div>
+          <h2 class="text-2xl font-extrabold text-white mt-1">01. IoT Hardware &amp; Live Telemetry Feed</h2>
+        </div>
+        <div class="flex items-center gap-2 font-mono text-xs">
+          <span id="iot-node-badge" class="px-3 py-1 rounded bg-slate-900 border border-slate-800 text-slate-300">ESP32-THAPAR-CSED-LAB204</span>
+          <span class="px-2.5 py-1 rounded bg-cyan-brand/10 border border-cyan-brand/30 text-cyan-brand">POLLING: 3000ms</span>
+        </div>
+      </div>
+
+      <!-- Node Hardware Status Header Card -->
+      <div class="glass-panel rounded-2xl p-6 border border-cyan-brand/30">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <div class="space-y-1">
+            <span class="text-[11px] font-mono text-slate-400 uppercase tracking-wider">Node Hardware Identity</span>
+            <div class="text-base font-bold text-white font-mono">ESP32-THAPAR-CSED-LAB204</div>
+            <div class="text-xs text-cyan-brand font-mono">PHY: Wi-Fi 6 (802.11ax) // TLS 1.3</div>
+          </div>
+          <div class="space-y-1">
+            <span class="text-[11px] font-mono text-slate-400 uppercase tracking-wider">Signal &amp; RSSI</span>
+            <div class="text-base font-bold text-emerald-400 font-mono">-48 dBm <span class="text-xs font-normal text-slate-400">(Excellent)</span></div>
+            <div class="text-xs text-slate-400 font-mono">BSSID: a4:c1:38:fe:90:1b</div>
+          </div>
+          <div class="space-y-1">
+            <span class="text-[11px] font-mono text-slate-400 uppercase tracking-wider">Node Uptime</span>
+            <div class="text-base font-bold text-white font-mono">99.98% <span class="text-xs font-normal text-slate-400">(142d 18h)</span></div>
+            <div class="text-xs text-slate-400 font-mono">Firmware: v3.2.1-tiet</div>
+          </div>
+          <div class="space-y-1">
+            <span class="text-[11px] font-mono text-slate-400 uppercase tracking-wider">Assigned IP / Port</span>
+            <div class="text-base font-bold text-white font-mono">10.42.8.14 : 8883</div>
+            <button onclick="pingHardwareNode()" id="ping-btn" class="text-xs px-2.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-cyan-brand border border-slate-700 font-mono transition-colors">
+              Ping Transceiver
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Telemetry Gauges (Voltage, Current, Power) -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        
+        <!-- Gauge 1: Voltage -->
+        <div class="glass-panel rounded-2xl p-6 border border-cyan-brand/25 relative">
+          <div class="flex items-center justify-between text-xs font-mono text-slate-400 mb-2">
+            <span>SENSOR_BUS_V1 // ADS1115</span>
+            <span class="text-emerald-400 px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20">RMS STABLE</span>
+          </div>
+          <div class="flex items-baseline gap-2">
+            <span id="live-voltage-val" class="text-5xl font-extrabold text-white font-mono tracking-tight">230.4</span>
+            <span class="text-cyan-brand font-bold text-2xl font-mono">V</span>
+          </div>
+          <div class="text-xs text-slate-400 mt-2 font-mono flex items-center justify-between">
+            <span>Grid Baseline: 230.0V</span>
+            <span id="voltage-delta" class="text-cyan-brand">±0.4V Delta</span>
+          </div>
+          <div class="mt-4 pt-4 border-t border-slate-800">
+            <div class="h-10 flex items-end gap-1 px-1">
+              <div class="w-1/12 bg-cyan-brand/40 h-6 rounded-t"></div>
+              <div class="w-1/12 bg-cyan-brand/40 h-7 rounded-t"></div>
+              <div class="w-1/12 bg-cyan-brand/50 h-6 rounded-t"></div>
+              <div class="w-1/12 bg-cyan-brand/60 h-8 rounded-t"></div>
+              <div class="w-1/12 bg-cyan-brand/50 h-7 rounded-t"></div>
+              <div class="w-1/12 bg-cyan-brand/70 h-8 rounded-t"></div>
+              <div class="w-1/12 bg-cyan-brand/80 h-9 rounded-t"></div>
+              <div class="w-1/12 bg-cyan-brand/60 h-7 rounded-t"></div>
+              <div class="w-1/12 bg-cyan-brand/50 h-6 rounded-t"></div>
+              <div class="w-1/12 bg-cyan-brand/70 h-8 rounded-t"></div>
+              <div class="w-1/12 bg-cyan-brand/90 h-9 rounded-t"></div>
+              <div class="w-1/12 bg-cyan-brand h-10 rounded-t"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Gauge 2: Current -->
+        <div class="glass-panel rounded-2xl p-6 border border-cyan-brand/25 relative">
+          <div class="flex items-center justify-between text-xs font-mono text-slate-400 mb-2">
+            <span>SCT-013 CT TRANSFORMER</span>
+            <span class="text-cyan-brand px-2 py-0.5 rounded bg-cyan-brand/10 border border-cyan-brand/20">LIVE DRAW</span>
+          </div>
+          <div class="flex items-baseline gap-2">
+            <span id="live-current-val" class="text-5xl font-extrabold text-white font-mono tracking-tight">93.50</span>
+            <span class="text-cyan-brand font-bold text-2xl font-mono">A</span>
+          </div>
+          <div class="text-xs text-slate-400 mt-2 font-mono flex items-center justify-between">
+            <span>Feeder Rating: 100A Max</span>
+            <span id="circuit-load-percent" class="text-cyan-brand">93.5% Load</span>
+          </div>
+          <div class="mt-4 pt-4 border-t border-slate-800 space-y-1.5">
+            <div class="flex justify-between text-[11px] font-mono text-slate-400">
+              <span>Feeder Headroom</span>
+              <span id="headroom-text">6.5 A Margin</span>
+            </div>
+            <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+              <div id="current-progress-bar" class="bg-gradient-to-r from-cyan-brand to-emerald-400 h-full rounded-full transition-all duration-500" style="width: 93.5%;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Gauge 3: Active Power -->
+        <div class="glass-panel rounded-2xl p-6 border border-cyan-brand/25 relative">
+          <div class="flex items-center justify-between text-xs font-mono text-slate-400 mb-2">
+            <span>ACTIVE LOAD (REAL POWER)</span>
+            <span id="power-kw-badge" class="text-alert-red px-2 py-0.5 rounded bg-alert-red/10 border border-alert-red/30 font-bold">18.6 kW</span>
+          </div>
+          <div class="flex items-baseline gap-2">
+            <span id="live-power-val" class="text-5xl font-extrabold text-white font-mono tracking-tight">18,580</span>
+            <span class="text-cyan-brand font-bold text-2xl font-mono">W</span>
+          </div>
+          <div class="text-xs text-slate-400 mt-2 font-mono flex items-center justify-between">
+            <span>Aggregated 3 Sub-circuits</span>
+            <button onclick="simulateLoadBurst()" class="text-cyan-brand hover:underline">Simulate Burst</button>
+          </div>
+          <div class="mt-4 pt-4 border-t border-slate-800 flex justify-between items-center text-xs font-mono">
+            <span class="text-slate-400">Power Factor:</span>
+            <span class="text-emerald-400 font-bold">0.86 (Good)</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- HC-SR501 PIR Motion Sensor Badge & Spatial Card -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        
+        <!-- PIR Motion Sensor Module -->
+        <div id="pir-alert-card" class="glass-panel rounded-2xl p-6 border border-alert-red/40 alert-pulse space-y-4">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <span id="pir-dot" class="w-3 h-3 rounded-full bg-alert-red pulse-dot"></span>
+              <h3 class="text-base font-bold text-white">HC-SR501 PIR Sensor (GPIO 14)</h3>
+            </div>
+            <span id="pir-status-badge" class="text-xs font-mono px-3 py-1 rounded-full bg-alert-red/20 text-alert-red border border-alert-red/50 font-bold tracking-wide">
+              PIR State: UNOCCUPIED DRAIN ALERT
+            </span>
+          </div>
+
+          <p id="pir-desc" class="text-xs text-slate-300 leading-relaxed">
+            The HC-SR501 PIR sensor detects <strong>zero human motion</strong> in CSED Lab 204 during off-hours, but active power remains at <strong class="text-alert-red font-mono">18.6 kW</strong>. Critical phantom drain detected!
+          </p>
+
+          <div class="p-3.5 rounded-xl bg-slate-900/90 border border-slate-800 grid grid-cols-2 gap-4 text-xs font-mono">
+            <div>
+              <span class="text-slate-400 block text-[11px]">HARDWARE PIN</span>
+              <span class="text-white font-semibold">ESP32 GPIO 14 (Interrupt)</span>
+            </div>
+            <div>
+              <span class="text-slate-400 block text-[11px]">FINANCIAL IMPACT</span>
+              <span id="pir-hourly-loss" class="text-alert-red font-bold">₹145.08 / hour waste</span>
+            </div>
+          </div>
+
+          <!-- Actuation Controls -->
+          <div class="flex items-center gap-3 pt-2">
+            <button onclick="toggleRelayCutoff()" id="relay-cutoff-btn" class="flex-1 py-2.5 px-4 rounded-xl bg-alert-red/20 hover:bg-alert-red/30 border border-alert-red/50 text-alert-red font-semibold text-xs tracking-wider uppercase transition-all duration-200 flex items-center justify-center gap-2">
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+              </svg>
+              Trigger Solid-State Relay Cutoff
+            </button>
+            <button onclick="resetMotionStatus()" class="py-2.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium text-xs border border-slate-700 transition-colors">
+              Reset PIR State
+            </button>
+          </div>
+        </div>
+
+        <!-- Automated Maintenance Alert Log Feed -->
+        <div class="glass-panel rounded-2xl p-6 border border-cyan-brand/25 space-y-4">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <svg class="w-4 h-4 text-cyan-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+              </svg>
+              <h3 class="text-base font-bold text-white">Automated Maintenance Alert Log Feed</h3>
+            </div>
+            <span class="text-xs font-mono text-cyan-brand">SUB-SECOND EVENT LOG</span>
+          </div>
+
+          <div class="space-y-2.5 max-h-56 overflow-y-auto pr-1" id="alert-feed-list">
+            <!-- Alert Items will be appended dynamically by app.js -->
+            <div class="p-3 rounded-xl bg-slate-900/80 border border-alert-red/30 flex items-start justify-between gap-3 text-xs">
+              <div class="space-y-1">
+                <div class="flex items-center gap-2">
+                  <span class="px-1.5 py-0.5 rounded bg-alert-red/20 text-alert-red font-mono font-bold text-[10px]">CRITICAL</span>
+                  <span class="font-semibold text-white">Unoccupied Drain Alert — Lab 204</span>
+                  <span class="text-slate-500 font-mono text-[10px]">Just now</span>
+                </div>
+                <p class="text-slate-400 text-[11px]">Unoccupied load: 18.6 kW persisting with zero motion detection on GPIO 14.</p>
+              </div>
+              <button onclick="dismissAlert(this)" class="text-[11px] font-mono text-cyan-brand hover:underline px-2 py-1 rounded bg-slate-800">Ack</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- 3 Sub-Circuits Breakdown Table -->
+      <div class="glass-panel rounded-2xl p-6 border border-cyan-brand/25 space-y-4">
+        <div class="flex items-center justify-between">
+          <h3 class="text-base font-bold text-white flex items-center gap-2">
+            <span class="text-cyan-brand">//</span> Sub-Circuit Detailed Telemetry (CSED Computer Lab 204)
+          </h3>
+          <span class="text-xs font-mono text-slate-400">REAL-TIME RMS MEASUREMENT</span>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs font-mono">
+            <thead>
+              <tr class="border-b border-slate-800 text-slate-400">
+                <th class="pb-3 font-semibold">SUB-CIRCUIT FEED</th>
+                <th class="pb-3 font-semibold">CURRENT (A)</th>
+                <th class="pb-3 font-semibold">POWER FACTOR</th>
+                <th class="pb-3 font-semibold">ACTIVE POWER (W)</th>
+                <th class="pb-3 font-semibold">APPARENT (VA)</th>
+                <th class="pb-3 font-semibold text-right">STATUS</th>
+              </tr>
+            </thead>
+            <tbody id="iot-subcircuits-tbody" class="divide-y divide-slate-800/60 text-slate-300">
+              <tr class="hover:bg-slate-900/40 transition-colors">
+                <td class="py-3 text-white font-semibold flex items-center gap-2">
+                  <span class="w-1.5 h-1.5 rounded-full bg-cyan-brand"></span>
+                  Lighting (LED Panels + Emergency)
+                </td>
+                <td class="py-3">4.20 A</td>
+                <td class="py-3">0.92</td>
+                <td class="py-3 text-cyan-brand font-bold">889.3 W</td>
+                <td class="py-3 text-slate-400">967.7 VA</td>
+                <td class="py-3 text-right"><span class="px-2 py-0.5 rounded bg-amber-500/10 text-amber-400">DRAIN</span></td>
+              </tr>
+              <tr class="hover:bg-slate-900/40 transition-colors">
+                <td class="py-3 text-white font-semibold flex items-center gap-2">
+                  <span class="w-1.5 h-1.5 rounded-full bg-cyan-brand"></span>
+                  Desktop PC Racks (42 Stations)
+                </td>
+                <td class="py-3">46.50 A</td>
+                <td class="py-3">0.85</td>
+                <td class="py-3 text-alert-red font-bold">9,106.9 W</td>
+                <td class="py-3 text-slate-400">10,713.6 VA</td>
+                <td class="py-3 text-right"><span class="px-2 py-0.5 rounded bg-alert-red/20 text-alert-red">PHANTOM LOAD</span></td>
+              </tr>
+              <tr class="hover:bg-slate-900/40 transition-colors">
+                <td class="py-3 text-white font-semibold flex items-center gap-2">
+                  <span class="w-1.5 h-1.5 rounded-full bg-cyan-brand"></span>
+                  HVAC Split Units (4 × 2 TR)
+                </td>
+                <td class="py-3">42.80 A</td>
+                <td class="py-3">0.88</td>
+                <td class="py-3 text-alert-red font-bold">8,677.2 W</td>
+                <td class="py-3 text-slate-400">9,861.1 VA</td>
+                <td class="py-3 text-right"><span class="px-2 py-0.5 rounded bg-alert-red/20 text-alert-red">IDLE COMPRESSOR</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ==================================================================== -->
+    <!-- VIEW 2: 02. AI ENERGY ANOMALY AUDIT (id="view-audit")                -->
+    <!-- ==================================================================== -->
+    <section id="view-audit" class="view-container hidden space-y-7">
+      
+      <!-- View Header Breadcrumb & Status -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-800">
+        <div>
+          <div class="flex items-center gap-2 text-xs font-mono text-violet-brand">
+            <span>MODEL: ISOLATION FOREST</span>
+            <span class="text-slate-600">//</span>
+            <span>REST ENDPOINT: /api/audit</span>
+          </div>
+          <h2 class="text-2xl font-extrabold text-white mt-1">02. AI Energy Anomaly Audit &amp; Isolation Forest ML</h2>
+        </div>
+        <div class="flex items-center gap-2 font-mono text-xs">
+          <span class="px-3 py-1 rounded bg-violet-brand/15 border border-violet-brand/30 text-violet-300 font-semibold">KERNEL: ISOLATION FOREST v2.1</span>
+          <button onclick="triggerRetrain()" id="retrain-btn" class="px-3 py-1 rounded bg-slate-800 hover:bg-slate-700 text-cyan-brand border border-slate-700 transition-colors">
+            Retrain Baseline
+          </button>
+        </div>
+      </div>
+
+      <!-- Model Confidence & Diagnostics Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        
+        <div class="glass-panel rounded-2xl p-6 border border-violet-brand/30">
+          <div class="flex items-center justify-between text-xs font-mono text-slate-400 mb-2">
+            <span>MODEL CONFIDENCE</span>
+            <span class="text-violet-300 font-semibold">ISOLATION FOREST</span>
+          </div>
+          <div class="flex items-baseline gap-2">
+            <span id="audit-confidence-val" class="text-5xl font-extrabold text-white font-mono">94.6</span>
+            <span class="text-violet-400 font-bold text-2xl font-mono">%</span>
+          </div>
+          <p class="text-xs text-slate-400 mt-2">
+            Unsupervised decision forest isolating anomalous multidimensional load spikes from normal day profiles.
+          </p>
+          <div class="mt-4 pt-3 border-t border-slate-800 flex justify-between text-xs font-mono text-slate-400">
+            <span>Contamination: 17.0%</span>
+            <span class="text-emerald-400">Converged</span>
+          </div>
+        </div>
+
+        <div class="glass-panel rounded-2xl p-6 border border-violet-brand/30">
+          <div class="flex items-center justify-between text-xs font-mono text-slate-400 mb-2">
+            <span>CLUSTER SEPARATION</span>
+            <span class="text-cyan-brand font-mono font-semibold">MAHALANOBIS</span>
+          </div>
+          <div class="flex items-baseline gap-2">
+            <span class="text-5xl font-extrabold text-cyan-brand font-mono">3.25</span>
+            <span class="text-slate-400 font-bold text-xl font-mono">σ</span>
+          </div>
+          <p class="text-xs text-slate-400 mt-2">
+            Clean segregation between daytime academic schedule vs. unauthorized off-hour loads.
+          </p>
+          <div class="mt-4 pt-3 border-t border-slate-800 flex justify-between text-xs font-mono text-slate-400">
+            <span>Window: 02:00 — 05:30 AM</span>
+            <span class="text-cyan-brand">Calibrated</span>
+          </div>
+        </div>
+
+        <div class="glass-panel rounded-2xl p-6 border border-alert-red/30">
+          <div class="flex items-center justify-between text-xs font-mono text-slate-400 mb-2">
+            <span>DAILY FINANCIAL WASTE</span>
+            <span class="text-alert-red font-mono font-semibold">PSPCL TARIFF</span>
+          </div>
+          <div class="flex items-baseline gap-2">
+            <span id="audit-total-waste-card" class="text-5xl font-extrabold text-alert-red font-mono">₹1,944</span>
+            <span class="text-slate-300 font-bold text-xl font-mono">/ day</span>
+          </div>
+          <p class="text-xs text-slate-400 mt-2">
+            Accumulated annual loss: <strong class="text-white">₹7.1 Lakhs / year</strong> at commercial HT tariff.
+          </p>
+          <div class="mt-4 pt-3 border-t border-slate-800 flex justify-between text-xs font-mono text-slate-400">
+            <span>Annual CO₂ Avoidable: 41.8 T</span>
+            <span class="text-alert-red">Actionable</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- 24-Hour Load Curve Chart with Anomaly Spike Zone (2:00 AM - 5:30 AM) -->
+      <div class="glass-panel rounded-2xl p-6 border border-violet-brand/25 space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h3 class="text-lg font-bold text-white flex items-center gap-2">
+              <span>Nava Nalanda Central Library — 24-Hour Power Curve vs. ML Baseline</span>
+            </h3>
+            <p class="text-xs text-slate-400">Observed demand curve showing 42 kW off-hour chiller leak (02:00 AM — 05:30 AM).</p>
+          </div>
+          
+          <div class="flex items-center gap-4 text-xs font-mono flex-wrap">
+            <div class="flex items-center gap-1.5">
+              <span class="w-3 h-0.5 bg-cyan-brand"></span>
+              <span class="text-slate-300">Expected Baseline (kW)</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <span class="w-3 h-0.5 bg-alert-red"></span>
+              <span class="text-alert-red font-semibold">Observed Load (kW)</span>
+            </div>
+            <div class="flex items-center gap-1.5 px-2.5 py-1 rounded bg-alert-red/15 border border-alert-red/40 text-alert-red">
+              <span class="w-2 h-2 rounded-full bg-alert-red pulse-dot"></span>
+              <span>Off-Hour Anomaly Zone (02:00 — 05:30)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- SVG Visual 24-Hour Load Curve Chart -->
+        <div class="w-full bg-[#080B12] rounded-xl p-4 border border-slate-800/80 overflow-x-auto">
+          <div class="min-w-[650px]">
+            <svg viewBox="0 0 800 240" class="w-full h-56">
+              <defs>
+                <linearGradient id="anomalyGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#FF4D4D" stop-opacity="0.25"></stop>
+                  <stop offset="100%" stop-color="#FF4D4D" stop-opacity="0.02"></stop>
+                </linearGradient>
+                <linearGradient id="baselineGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#23C0B4" stop-opacity="0.18"></stop>
+                  <stop offset="100%" stop-color="#23C0B4" stop-opacity="0.0"></stop>
+                </linearGradient>
+              </defs>
+
+              <!-- Grid Horizontal Lines -->
+              <line x1="40" y1="30" x2="780" y2="30" stroke="#1E293B" stroke-dasharray="4" stroke-width="1"></line>
+              <line x1="40" y1="80" x2="780" y2="80" stroke="#1E293B" stroke-dasharray="4" stroke-width="1"></line>
+              <line x1="40" y1="130" x2="780" y2="130" stroke="#1E293B" stroke-dasharray="4" stroke-width="1"></line>
+              <line x1="40" y1="180" x2="780" y2="180" stroke="#1E293B" stroke-dasharray="4" stroke-width="1"></line>
+              
+              <!-- Y-Axis labels (kW) -->
+              <text x="30" y="34" fill="#64748B" font-size="10" font-family="JetBrains Mono" text-anchor="end">100 kW</text>
+              <text x="30" y="84" fill="#64748B" font-size="10" font-family="JetBrains Mono" text-anchor="end">75 kW</text>
+              <text x="30" y="134" fill="#64748B" font-size="10" font-family="JetBrains Mono" text-anchor="end">50 kW</text>
+              <text x="30" y="184" fill="#64748B" font-size="10" font-family="JetBrains Mono" text-anchor="end">25 kW</text>
+
+              <!-- HIGHLIGHTED ANOMALY ZONE: 02:00 to 05:30 -->
+              <rect x="102" y="20" width="108" height="170" fill="url(#anomalyGradient)" stroke="#FF4D4D" stroke-dasharray="3 3" stroke-width="1.2" rx="4"></rect>
+              
+              <!-- Anomaly Callout Tag -->
+              <rect x="110" y="26" width="92" height="20" rx="3" fill="#FF4D4D" fill-opacity="0.9"></rect>
+              <text x="156" y="39" fill="#FFFFFF" font-size="9" font-family="JetBrains Mono" font-weight="bold" text-anchor="middle">LEAK DETECTED</text>
+
+              <!-- Expected Baseline Curve (Cyan Smooth Path) -->
+              <path d="M 40,175 Q 70,175 102,175 T 160,173 T 210,170 T 300,120 T 420,55 T 540,65 T 660,110 T 740,160 T 780,175" fill="none" stroke="#23C0B4" stroke-width="2.5" stroke-linecap="round"></path>
+
+              <!-- Actual Observed Curve (With Red Spike during 02:00-05:30) -->
+              <path d="M 40,175 L 102,173 Q 120,110 156,75 Q 185,90 210,168 L 300,122 L 420,57 L 540,63 L 660,112 L 740,158 L 780,174" fill="none" stroke="#FF4D4D" stroke-width="2.5" stroke-linecap="round"></path>
+
+              <!-- Surge Indicator Point -->
+              <circle cx="156" cy="75" r="5" fill="#FF4D4D" stroke="#FFFFFF" stroke-width="2"></circle>
+              <text x="165" y="70" fill="#FF8080" font-size="10" font-family="JetBrains Mono" font-weight="bold">+42 kW Leak (03:15 AM)</text>
+
+              <!-- X-Axis Timestamps -->
+              <line x1="40" y1="195" x2="780" y2="195" stroke="#334155" stroke-width="1"></line>
+              <text x="40" y="212" fill="#64748B" font-size="10" font-family="JetBrains Mono" text-anchor="middle">00:00</text>
+              <text x="102" y="212" fill="#FF8080" font-size="10" font-family="JetBrains Mono" font-weight="bold" text-anchor="middle">02:00</text>
+              <text x="156" y="212" fill="#FF8080" font-size="10" font-family="JetBrains Mono" font-weight="bold" text-anchor="middle">03:30</text>
+              <text x="210" y="212" fill="#FF8080" font-size="10" font-family="JetBrains Mono" font-weight="bold" text-anchor="middle">05:30</text>
+              <text x="300" y="212" fill="#64748B" font-size="10" font-family="JetBrains Mono" text-anchor="middle">08:00</text>
+              <text x="420" y="212" fill="#64748B" font-size="10" font-family="JetBrains Mono" text-anchor="middle">12:00</text>
+              <text x="540" y="212" fill="#64748B" font-size="10" font-family="JetBrains Mono" text-anchor="middle">16:00</text>
+              <text x="660" y="212" fill="#64748B" font-size="10" font-family="JetBrains Mono" text-anchor="middle">20:00</text>
+              <text x="780" y="212" fill="#64748B" font-size="10" font-family="JetBrains Mono" text-anchor="middle">23:59</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Anomaly Audit Table (Nava Nalanda, Hostel M, Block C) -->
+      <div class="glass-panel rounded-2xl p-6 border border-violet-brand/25 space-y-4">
+        <div class="flex items-center justify-between">
+          <h3 class="text-base font-bold text-white flex items-center gap-2">
+            <svg class="w-4 h-4 text-violet-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+            </svg>
+            Off-Hour Electrical Leaks Ledger &amp; Remediation Directives
+          </h3>
+          <span class="text-xs font-mono text-slate-400">RATES CONVERTED AT PSPCL ₹7.80/kWh</span>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs font-mono">
+            <thead>
+              <tr class="border-b border-slate-800 text-slate-400">
+                <th class="pb-3 font-semibold">FACILITY / CAMPUS ZONE</th>
+                <th class="pb-3 font-semibold">ANOMALY WINDOW</th>
+                <th class="pb-3 font-semibold">LEAKAGE (kWh)</th>
+                <th class="pb-3 font-semibold">ML CONFIDENCE</th>
+                <th class="pb-3 font-semibold">WASTE COST (₹)</th>
+                <th class="pb-3 font-semibold text-right">ACTION STATUS</th>
+              </tr>
+            </thead>
+            <tbody id="audit-table-body" class="divide-y divide-slate-800/60 text-slate-300">
+              <!-- Dynamically populated or rendered -->
+              <tr class="hover:bg-slate-900/40 transition-colors">
+                <td class="py-3.5 flex items-center gap-2">
+                  <span class="w-2 h-2 rounded-full bg-alert-red"></span>
+                  <span class="font-semibold text-white">Nava Nalanda Central Library (Floor 2 - Chiller &amp; AHU feed)</span>
+                </td>
+                <td class="py-3.5 text-slate-400">02:00 AM — 05:30 AM</td>
+                <td class="py-3.5 text-alert-red font-bold">42 kWh leak</td>
+                <td class="py-3.5 text-violet-300 font-bold">94.6%</td>
+                <td class="py-3.5 text-white font-bold">₹327.60 / night</td>
+                <td class="py-3.5 text-right">
+                  <button class="px-2.5 py-1 rounded bg-alert-red/20 text-alert-red border border-alert-red/40 hover:bg-alert-red/30 transition-colors">
+                    Relay Cut Auto-Dispatched
+                  </button>
+                </td>
+              </tr>
+              <tr class="hover:bg-slate-900/40 transition-colors">
+                <td class="py-3.5 flex items-center gap-2">
+                  <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+                  <span class="font-semibold text-white">Hostel M (Block A/B Night Baseline - Common Areas)</span>
+                </td>
+                <td class="py-3.5 text-slate-400">02:00 AM — 05:30 AM</td>
+                <td class="py-3.5 text-amber-400 font-bold">28 kWh leak</td>
+                <td class="py-3.5 text-violet-300 font-bold">89.2%</td>
+                <td class="py-3.5 text-white font-bold">₹218.40 / night</td>
+                <td class="py-3.5 text-right">
+                  <button class="px-2.5 py-1 rounded bg-amber-500/20 text-amber-400 border border-amber-500/40 hover:bg-amber-500/30 transition-colors">
+                    Security Patrol Notified
+                  </button>
+                </td>
+              </tr>
+              <tr class="hover:bg-slate-900/40 transition-colors">
+                <td class="py-3.5 flex items-center gap-2">
+                  <span class="w-2 h-2 rounded-full bg-alert-red"></span>
+                  <span class="font-semibold text-white">Block C (Lecture Hall 102 Split ACs)</span>
+                </td>
+                <td class="py-3.5 text-slate-400">02:00 AM — 05:30 AM</td>
+                <td class="py-3.5 text-alert-red font-bold">15 kWh leak</td>
+                <td class="py-3.5 text-violet-300 font-bold">76.8%</td>
+                <td class="py-3.5 text-white font-bold">₹117.00 / night</td>
+                <td class="py-3.5 text-right">
+                  <button class="px-2.5 py-1 rounded bg-cyan-brand/20 text-cyan-brand border border-cyan-brand/40 hover:bg-cyan-brand/30 transition-colors">
+                    VFD Idle Throttling
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ==================================================================== -->
+    <!-- VIEW 3: 03. VFD HVAC MOTOR CALCULATOR (id="view-vfd")                -->
+    <!-- ==================================================================== -->
+    <section id="view-vfd" class="view-container hidden space-y-7">
+      
+      <!-- View Header Breadcrumb & Status -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-800">
+        <div>
+          <div class="flex items-center gap-2 text-xs font-mono text-cyan-brand">
+            <span>PHYSICS: CENTRIFUGAL AFFINITY LAWS</span>
+            <span class="text-slate-600">//</span>
+            <span>REST ENDPOINT: /api/vfd</span>
+          </div>
+          <h2 class="text-2xl font-extrabold text-white mt-1">03. VFD HVAC Motor &amp; Carbon Offset Calculator</h2>
+        </div>
+        <div class="flex items-center gap-2 font-mono text-xs">
+          <span class="px-3 py-1 rounded bg-slate-900 border border-slate-800 text-slate-300">ACTUATOR: TAN AUDITORIUM 22 kW</span>
+          <span class="px-2.5 py-1 rounded bg-teal-500/10 border border-teal-500/30 text-teal-300 font-semibold">ISO 50001 COMPLIANT</span>
+        </div>
+      </div>
+
+      <!-- Main Interactive Calculator Workspace -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-7">
+        
+        <!-- Left Column: Interactive Slider & Motor Setpoint Controls (7 cols) -->
+        <div class="lg:col-span-7 space-y-6">
+          
+          <div class="glass-panel rounded-2xl p-6 border border-cyan-brand/30 space-y-6">
+            <div class="flex items-center justify-between">
+              <div>
+                <h3 class="text-base font-bold text-white">Centrifugal AHU Blower Speed Setpoint</h3>
+                <p class="text-xs text-slate-400">TAN Auditorium Variable Frequency Drive Inverter Control (0% – 100%)</p>
+              </div>
+              <div class="text-right">
+                <span id="motor-speed-display" class="text-4xl font-extrabold text-cyan-brand font-mono">80</span>
+                <span class="text-cyan-brand font-bold text-xl font-mono">%</span>
+              </div>
+            </div>
+
+            <!-- Slider Control Component -->
+            <div class="space-y-3 pt-2">
+              <input type="range" id="vfd-slider" min="0" max="100" value="80" step="1" oninput="updateVfdCalculations(this.value)" class="w-full">
+              
+              <div class="flex justify-between text-xs font-mono text-slate-400">
+                <span>0% (Stopped)</span>
+                <span class="text-cyan-brand font-bold">80% (Sweet Spot)</span>
+                <span>100% (Full Throttle)</span>
+              </div>
+            </div>
+
+            <!-- Quick Preset Buttons -->
+            <div class="pt-2">
+              <span class="text-[11px] font-mono text-slate-400 uppercase tracking-wider block mb-2">Operational Presets</span>
+              <div class="grid grid-cols-3 gap-3">
+                <button onclick="applyPreset(70)" class="py-2 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-xs font-mono text-slate-300 hover:text-white transition-colors">
+                  70% Eco Economy
+                </button>
+                <button onclick="applyPreset(80)" class="py-2 px-3 rounded-xl bg-cyan-brand/20 border border-cyan-brand/50 text-xs font-mono text-cyan-brand font-bold shadow-[0_0_12px_rgba(35,192,180,0.2)]">
+                  80% Optimal (~49% Cut)
+                </button>
+                <button onclick="applyPreset(100)" class="py-2 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-xs font-mono text-slate-300 hover:text-white transition-colors">
+                  100% Peak Rating
+                </button>
+              </div>
+            </div>
+
+            <!-- Dynamic Telemetry Inverter Readouts -->
+            <div class="grid grid-cols-3 gap-3 pt-4 border-t border-slate-800 font-mono text-xs">
+              <div class="p-3 rounded-lg bg-black/40 border border-slate-800">
+                <span class="text-slate-500 text-[10px] block">INVERTER FREQ</span>
+                <span id="readout-freq" class="text-white font-bold text-sm">40.0 Hz</span>
+                <span class="text-[10px] text-slate-500 block">(Nominal 50 Hz)</span>
+              </div>
+              <div class="p-3 rounded-lg bg-black/40 border border-slate-800">
+                <span class="text-slate-500 text-[10px] block">MOTOR RPM</span>
+                <span id="readout-rpm" class="text-white font-bold text-sm">1,152 RPM</span>
+                <span class="text-[10px] text-slate-500 block">(Base: 1,440 RPM)</span>
+              </div>
+              <div class="p-3 rounded-lg bg-black/40 border border-slate-800">
+                <span class="text-slate-500 text-[10px] block">THROTTLE FACTOR</span>
+                <span id="readout-factor" class="text-cyan-brand font-bold text-sm">0.80³ = 0.512</span>
+                <span class="text-[10px] text-slate-500 block">Cubic Exponent</span>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Affinity Law Physics Card -->
+          <div class="glass-panel rounded-2xl p-6 border border-violet-brand/30 space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-mono px-2 py-0.5 rounded bg-violet-brand/20 text-violet-300 border border-violet-brand/40 font-semibold">AFFINITY LAW III // FLUID DYNAMICS</span>
+              <span class="text-xs font-mono text-slate-400">P ∝ N³</span>
+            </div>
+            
+            <h4 class="text-lg font-bold text-white">Dynamic Affinity Law Formula</h4>
+            
+            <div class="p-4 rounded-xl bg-obsidian border border-violet-brand/40 text-center font-mono space-y-2">
+              <div class="text-xl sm:text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-brand to-violet-brand">
+                P₂ / P₁ = (N₂ / N₁)³
+              </div>
+              <p class="text-xs text-slate-400">
+                Shaft power requirements decrease as the <span class="text-white font-semibold">cube of motor rotational speed</span>.
+              </p>
+            </div>
+
+            <p class="text-xs text-slate-300 leading-relaxed">
+              At <strong class="text-cyan-brand">80% speed setpoint</strong> ($0.80^3 = 0.512$), power drawn by the 22 kW centrifugal blower drops from <strong>22.0 kW down to 11.26 kW</strong>, delivering an instantaneous <strong class="text-emerald-400">~48.8% energy reduction</strong> while preserving required volumetric air changes.
+            </p>
+          </div>
+
+        </div>
+
+        <!-- Right Column: Live Savings Output Widgets (5 cols) -->
+        <div class="lg:col-span-5 space-y-6">
+          
+          <!-- Widget 1: Real-Time kW Saved -->
+          <div class="glass-panel rounded-2xl p-6 border border-cyan-brand/30 relative overflow-hidden">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-mono uppercase tracking-wider text-slate-400">Real-Time Draw Reduction</span>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-brand/10 text-cyan-brand border border-cyan-brand/20">INSTANTANEOUS</span>
+            </div>
+            <div class="flex items-baseline gap-2">
+              <span id="saved-kw-display" class="text-5xl font-extrabold text-cyan-brand font-mono tracking-tight">10.74</span>
+              <span class="text-white font-bold text-2xl font-mono">kW Saved</span>
+            </div>
+            <div class="mt-3 text-xs text-slate-400 flex items-center justify-between font-mono pt-3 border-t border-slate-800">
+              <span>Full Load: 22.00 kW</span>
+              <span id="effective-draw-display" class="text-white">Active Draw: 11.26 kW</span>
+            </div>
+            <div class="mt-2 text-xs font-mono text-emerald-400 flex items-center gap-1.5">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+              <span id="power-percentage-drop">48.8% Immediate Power Reduction</span>
+            </div>
+          </div>
+
+          <!-- Widget 2: Annual Rupee Savings (₹) -->
+          <div class="glass-panel rounded-2xl p-6 border border-violet-brand/30 relative overflow-hidden">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-mono uppercase tracking-wider text-slate-400">Annual Rupee Savings</span>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-violet-brand/20 text-violet-300 border border-violet-brand/30">PSPCL TARIFF</span>
+            </div>
+            <div class="flex items-baseline gap-2">
+              <span id="annual-rupee-display" class="text-5xl font-extrabold text-white font-mono tracking-tight">₹2,93,202</span>
+              <span class="text-violet-400 font-bold text-lg font-mono">/ year</span>
+            </div>
+            <div class="mt-3 text-xs text-slate-400 flex items-center justify-between font-mono pt-3 border-t border-slate-800">
+              <span>Based on 3,500 runtime hrs</span>
+              <span class="text-white">Rate: ₹7.80 / kWh</span>
+            </div>
+            <div class="mt-2 text-xs font-mono text-cyan-brand flex items-center gap-1.5">
+              <span class="w-1.5 h-1.5 rounded-full bg-cyan-brand"></span>
+              <span id="annual-kwh-display">37,590 kWh Net Annual Conservation</span>
+            </div>
+          </div>
+
+          <!-- Widget 3: Annual CO2 Avoided (Tonnes) -->
+          <div class="glass-panel rounded-2xl p-6 border border-emerald-500/30 relative overflow-hidden">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-mono uppercase tracking-wider text-slate-400">Annual CO₂ Decarbonization</span>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">CEA FACTOR 0.70</span>
+            </div>
+            <div class="flex items-baseline gap-2">
+              <span id="annual-co2-display" class="text-5xl font-extrabold text-emerald-400 font-mono tracking-tight">26.32</span>
+              <span class="text-slate-300 font-bold text-lg font-mono">Tonnes CO₂</span>
+            </div>
+            <div class="mt-3 text-xs text-slate-400 flex items-center justify-between font-mono pt-3 border-t border-slate-800">
+              <span>0.70 kg CO₂ avoided per kWh</span>
+              <span class="text-emerald-400 font-semibold" id="tree-equiv-display">~1,195 Trees Planted</span>
+            </div>
+            <div class="mt-2 text-xs font-mono text-emerald-300 flex items-center gap-1.5">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-300"></span>
+              <span>Scope 2 Campus Decarbonization Milestone</span>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- ==================================================================== -->
+  <!-- GLOBAL FOOTER                                                        -->
+  <!-- ==================================================================== -->
+  <footer class="mt-auto border-t border-slate-800/80 bg-obsidian/95 py-6">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-400">
+      <div class="flex items-center gap-3">
+        <span class="w-2 h-2 rounded-full bg-cyan-brand"></span>
+        <span class="font-medium text-slate-300">EcoPulse AI Platform</span>
+        <span class="text-slate-600">|</span>
+        <span>Energy &amp; Environment (UEN008) — Section 1A14 Group 4</span>
+        <span class="text-slate-600">|</span>
+        <span>Thapar Institute of Engineering &amp; Technology, Patiala</span>
+      </div>
+      <div class="flex items-center gap-4 font-mono text-[11px] text-slate-500">
+        <span>Patiala, Punjab 147004</span>
+        <span class="text-slate-700">//</span>
+        <span class="text-cyan-brand/80">Broker: MQTT TLS 1.3 Active</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- SPA Router & Live Backend Connector Engine -->
+  <script src="js/app.js"></script>
+</body>
+</html>

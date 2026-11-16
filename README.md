@@ -1,73 +1,95 @@
 # 🌱 EcoPulse AI // Smart Campus Energy Optimization Framework
 
-> **Autonomous Hardware Telemetry, Unsupervised Machine Learning Audit, and VFD HVAC Analytics for Thapar Institute of Engineering & Technology (TIET).**
+> **Autonomous Hardware Telemetry, Unsupervised Machine Learning Audit, and VFD HVAC Analytics for Thapar Institute of Engineering & Technology (TIET), Patiala.**
+>
+> **Course:** Energy & Environment (UEN008) · **Group:** 4 · **Section:** 1A14
 
 ---
 
 ## 📌 Executive Summary
 
-**EcoPulse AI** is a low-cost, IoT-enabled smart energy management platform designed to eliminate electrical waste across university campus infrastructure.
+**EcoPulse AI** is an IoT-enabled smart campus energy management platform designed to eliminate electrical waste across university campus infrastructure.
 
-By pairing sub-second **ESP32 hardware telemetry** and **HC-SR501 PIR motion sensing** with **Isolation Forest machine learning**, EcoPulse AI detects baseline electrical anomalies and regulates heavy HVAC motor loads via **Variable Frequency Drive (VFD) Affinity Laws**.
+By pairing sub-second **ESP32 hardware telemetry** and **HC-SR501 PIR motion sensing** with **Isolation Forest machine learning**, EcoPulse AI detects baseline electrical anomalies and regulates heavy HVAC motor loads via **Centrifugal Affinity Laws**.
 
 ---
 
 ## ⚡ Key Modules & Features
 
 ### 1. 📡 IoT Hardware & Live Telemetry (`/api/iot`)
-
-* **Hardware**: ESP32 Microcontroller + HC-SR501 Passive Infrared (PIR) Sensor (GPIO 14).
-* **Location Focus**: **CSED Computer Lab 204** (Computer Science & Engineering Dept).
-* **Capabilities**: Reads real-time voltage (220 V – 232 V), current (A), and active power (W). Automatically triggers a **CRITICAL UNOCCUPIED DRAIN ALERT** when active loads exceed the threshold during zero-occupancy periods.
+* **Hardware**: ESP32 Microcontroller Node `ESP32-THAPAR-CSED-LAB204` + HC-SR501 Passive Infrared (PIR) Sensor (GPIO 14).
+* **Location**: **CSED Computer Lab 204** (Computer Science & Engineering Department).
+* **Capabilities**: Reads real-time voltage ($228.0\,\text{V} - 232.5\,\text{V}$), current (A), and active power (W) across 3 sub-circuits (Lighting, Desktop PC Racks, HVAC split units).
+* **Automated Alert Engine**: Triggers **CRITICAL UNOCCUPIED DRAIN ALERT: 18.6 kW** when active loads persist during zero-occupancy periods. Includes a solid-state relay cutoff actuation control.
 
 ### 2. 🧠 AI Energy Anomaly Audit (`/api/audit`)
-
-* **Algorithm**: Unsupervised **Isolation Forest** (Scikit-Learn).
-* **Campus Feeders**: Tracks 24-hour baseline profiles across **Nava Nalanda Central Library (Floor 2)**, **Hostel M**, and **Block C (LH 102)**.
-* **Impact**: Flags late-night off-hour power leaks (2:00 AM – 5:30 AM), converting wasted kilowatt-hours into financial loss in Indian Rupees (₹).
+* **Algorithm**: Unsupervised **Isolation Forest** (`scikit-learn`).
+* **Campus Feeders**: Tracks 24-hour baseline profiles across:
+  * **Nava Nalanda Central Library (Floor 2)**: $42\,\text{kWh}$ off-hour leak $\rightarrow$ ₹327.60 / night
+  * **Hostel M (Block A/B Night Baseline)**: $28\,\text{kWh}$ off-hour leak $\rightarrow$ ₹218.40 / night
+  * **Academic Block C (LH 102 Split ACs)**: $15\,\text{kWh}$ off-hour leak $\rightarrow$ ₹117.00 / night
+* **Anomaly Window**: 02:00 AM – 05:30 AM with a **94.6% anomaly confidence score**.
+* **Financial Impact**: Evaluated against the **PSPCL Commercial HT Tariff (₹7.80/kWh)**, identifying **₹1,944 / day** (₹7.1 Lakhs/year) and **41.8 Tonnes CO₂** in avoidable off-hour electrical waste.
 
 ### 3. 🌀 VFD HVAC Motor & Carbon Calculator (`/api/vfd`)
-
 * **Physics Principle**: Centrifugal Affinity Laws governing fluid and air movement:
-
-  $$\frac{P_2}{P_1} = \left(\frac{N_2}{N_1}\right)^3$$
-
+  $$\frac{Q_2}{Q_1} = \frac{N_2}{N_1}, \quad \frac{H_2}{H_1} = \left(\frac{N_2}{N_1}\right)^2, \quad \frac{P_2}{P_1} = \left(\frac{N_2}{N_1}\right)^3$$
 * **Target Facility**: **Thapar Auditorium (TAN)** 22 kW (30 HP) Air Handling Unit (AHU) blower motor.
-* **Financial & Environmental Metrics**: Evaluated against the **PSPCL HT Institutional Tariff (₹7.80 / kWh)** and a carbon emission factor (0.7 kg CO₂ / kWh), demonstrating that a **20% speed drop yields ~48.8% energy savings**.
+* **Financial & Environmental Metrics**:
+  * Modeled at 3,500 active campus operating hours/year.
+  * Demonstrates that a **20% speed drop (80% setpoint) yields ~48.8% energy savings**.
+  * Saves **₹2,93,202 / year** and mitigates **26.32 Tonnes CO₂ / year** ($\sim 1,195$ trees planted equivalent) at $0.70\,\text{kg CO}_2/\text{kWh}$.
 
 ---
 
-## 🏫 Thapar Campus Parameters
+## 🏛️ Thapar Campus System Parameters
 
 | Parameter | Value |
 | :--- | :--- |
-| Target Facility | Thapar Auditorium (TAN) |
-| HVAC Load | 22 kW (30 HP) AHU blower motor |
-| Electricity Tariff | PSPCL HT Institutional Tariff, ₹7.80 / kWh |
-| Carbon Emission Factor | 0.7 kg CO₂ / kWh |
-| Modeled Speed Reduction | 20% |
-| Estimated Energy Savings | ~48.8% |
-| IoT Test Location | CSED Computer Lab 204 |
-| Supply Voltage Range | 220 V – 232 V |
+| **Institution** | Thapar Institute of Engineering & Technology (TIET), Patiala |
+| **Course** | Energy & Environment (UEN008) — Group 4, Section 1A14 |
+| **Target Facility (VFD)** | Thapar Auditorium (TAN) |
+| **HVAC Load** | 22 kW (30 HP) AHU Centrifugal Blower Motor |
+| **Electricity Tariff** | PSPCL Commercial HT Tariff, ₹7.80 / kWh |
+| **Grid Carbon Factor** | CEA Northern Grid Factor, 0.70 kg CO₂ / kWh |
+| **IoT Edge Node** | `ESP32-THAPAR-CSED-LAB204` on GPIO 14 |
+| **IoT Test Location** | CSED Computer Lab 204 |
+| **Nominal Voltage Range** | 228.0 V – 232.5 V RMS, 50 Hz |
 
 ---
 
-## 🏗️ Architecture & Directory Structure
+## 🏗️ Repository Architecture
 
 ```text
 ecopulse-ai/
-├── api/                        # Vercel Python Serverless Handlers
-│   ├── iot_telemetry.py        # Sub-second ESP32 & PIR telemetry API
+├── api/
+│   ├── iot_telemetry.py        # Sub-second ESP32 & HC-SR501 PIR telemetry API
 │   ├── ai_audit.py             # Isolation Forest anomaly detection API
-│   └── vfd_analytics.py        # VFD Affinity Law & carbon math API
-├── public/                     # Static Single-Page Astra UI Shell
-│   ├── index.html              # EcoPulse UI dashboard (GPT-6 Astra style)
+│   └── vfd_analytics.py        # VFD Affinity Law & carbon calculation API
+├── public/
+│   ├── index.html              # Unified Single-Page Dashboard (Stitch Astra-theme)
 │   ├── css/
 │   │   └── astra-theme.css     # Glassmorphism, neon glows & dark obsidian theme
 │   └── js/
-│       └── app.js              # Single-page tab switcher & API fetch handlers
-├── design.md                   # Complete UX design specification
+│       └── app.js              # SPA router, live API fetchers & dynamic sliders
+├── dev_server.py               # Single-origin local full-stack development server
 ├── requirements.txt            # Python runtime dependencies
-├── vercel.json                 # Single-origin route configuration
-└── README.md                   # Project documentation
+└── vercel.json                 # Vercel serverless routing configuration
+```
+
+---
+
+## 🚀 Running the Project
+
+### 1. Local Full-Stack Server
+Run the built-in development server (no external dependencies required):
+```bash
+python dev_server.py
+```
+Open **`http://localhost:3000`** in your browser.
+
+### 2. Vercel Deployment
+Deploy directly to Vercel as a single-origin serverless application:
+```bash
+vercel deploy --prod
 ```
